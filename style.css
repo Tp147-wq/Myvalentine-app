@@ -1,0 +1,215 @@
+/* Trang đầu: nền hồng + trái tim bay */
+body {
+  background-color: pink;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Nền trái tim bay */
+.hearts {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+.heart {
+  position: absolute;
+  font-size: 24px;
+  animation: rise 5s linear forwards;
+}
+@keyframes rise {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-600px); opacity: 0; }
+}
+
+/* Khung đăng nhập */
+#loginBox {
+  padding: 20px;
+  border: 5px solid;
+  border-radius: 15px;
+  animation: borderColor 3s infinite;
+  background: rgba(255,255,255,0.9);
+  position: relative;
+  display: inline-block;
+  margin-top: 100px;
+}
+.top-heart {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  font-size: 30px;
+}
+.avatar-box img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid rgb(33, 183, 217);
+  margin-bottom: 10px;
+}
+input {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  border: 3px solid;
+  border-radius: 8px;
+  animation: borderColor 3s infinite;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+#loginBtn, #exitBtn {
+  padding: 10px 20px;
+  border: 2px solid red;
+  background: white;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+#loginBtn:hover, #exitBtn:hover {
+  background: pink;
+}
+.message {
+  margin-top: 15px;
+  color: red;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Khung lá thư */
+.letter {
+  margin-top: 20px;
+  padding: 20px;
+  border: 5px solid;
+  border-radius: 15px;
+  animation: borderColor 3s infinite;
+  background: white;
+  display: inline-block;
+  max-width: 90vw;
+  max-height: 60vh;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  text-align: center;
+}
+#letterContent {
+  font-size: clamp(16px, 4vw, 22px);
+  line-height: 1.4;
+  margin: 0;
+}
+.letter-buttons {
+  margin-top: 20px;
+}
+
+/* Khung Có và Không */
+#yesBtn, #noBtn {
+  width: 100px;
+  height: 60px;
+  font-size: 16px;
+  border: 2px solid red;
+  background: white;
+  cursor: pointer;
+  position: relative;
+  animation: colorChange 3s infinite;
+}
+
+/* Hộp thoại thoát */
+.dialog {
+  display: none;
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 3px solid red;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1000;
+}
+
+/* Hiệu ứng đổi màu viền */
+@keyframes borderColor {
+  0% { border-color: red; }
+  50% { border-color: hotpink; }
+  100% { border-color: red; }
+}
+
+/* Hiệu ứng đổi màu khung Có/Không */
+@keyframes colorChange {
+  0%   { border-color: red; background-color: white; color: red; }
+  50%  { border-color: hotpink; background-color: mistyrose; color: darkred; }
+  100% { border-color: red; background-color: white; color: red; }
+}
+
+/* Popup cuối */
+#finalPopup {
+  display: none; /* JS sẽ đổi sang flex khi hiện */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+#finalPopup button {
+  padding: 15px 30px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: pink;
+  cursor: pointer;
+}
+
+/* --------------------------
+   Trang Valentine
+--------------------------- */
+.valentine-page {
+  background: black;
+  width: 100vw; height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stars {
+  position: absolute;
+  width: 100%; height: 100%;
+  background: transparent;
+  overflow: hidden;
+  z-index: 0; /* nằm dưới */
+}
+.star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 2s infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.2; }
+  to { opacity: 1; }
+}
+
+.heart-container {
+  display: inline-block;
+  animation: spinHeart 12s infinite linear;
+  z-index: 1; /* nằm trên sao */
+}
+#pinkboard {
+  width: 400px;
+  height: 400px;
+}
+@keyframes spinHeart {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}

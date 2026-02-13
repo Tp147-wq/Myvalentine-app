@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Valentine App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Nền trái tim bay -->
+  <div class="hearts"></div>
+
+  <!-- Khung đăng nhập -->
+  <div id="loginBox">
+    <div class="top-heart">❤️</div>
+    <div class="avatar-box">
+      <img src="538394150_776099858242382_6935076825103377586_n.jpg" alt="Avatar" />
+    </div>
+    <input type="text" id="Vo Anh Thu" placeholder="Tên đăng nhập">
+    <input type="password" id="05052008" placeholder="Mật khẩu">
+
+    <div class="buttons">
+      <button id="exitBtn" onclick="exitAction()">Thoát</button>
+      <button id="loginBtn" onclick="loginAction()">Đăng nhập</button>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+  </div>
+
+  <!-- Khung lá thư -->
+  <div id="letterBox" style="display:none;">
+    <div class="letter">
+      <h2>💌 Valentine hạnh phúc nhó người đẹp 💌</h2>
+      <p id="letterContent">Liệu em có muốn xem trái tim này hong(●'◡'●)</p>
+      <div class="letter-buttons">
+        <button id="noBtn" onclick="letterNo()">Không</button>
+        <button id="yesBtn" onclick="letterYes()">Có</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hộp thoại thoát -->
+  <div id="customDialog" class="dialog">
+    <p>Bạn có muốn thoát không?</p>
+    <button onclick="confirmExit(true)">OK</button>
+    <button onclick="confirmExit(false)">Cancel</button>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    function letterYes() {
+      window.location.href = "valentine.html"; // chuyển sang trang Valentine
+    }
+    // trong letterNo, khi nút Yes phủ hết màn hình:
+    // yesBtn.onclick = () => window.location.href = "valentine.html";
+  </script>
+</body>
+</html>

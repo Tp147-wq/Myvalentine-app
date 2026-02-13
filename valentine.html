@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Ultimate</title>
+
+<style>
+
+/* ===== TYPE EFFECT ===== */
+
+.char{
+opacity:0;
+display:inline-block;
+white-space:pre;
+}
+
+.char.show{
+opacity:1;
+animation: rainbowSpark 1.5s linear forwards;
+}
+
+@keyframes rainbowSpark{
+0%{color:red;text-shadow:0 0 5px red;}
+20%{color:orange;text-shadow:0 0 8px orange;}
+40%{color:yellow;text-shadow:0 0 8px yellow;}
+60%{color:lime;text-shadow:0 0 8px lime;}
+80%{color:deepskyblue;text-shadow:0 0 8px deepskyblue;}
+100%{color:black;text-shadow:none;}
+}
+
+/* ===== FALLING TEXT PRO ===== */
+
+/* ===== FALLING TEXT & ICON ===== */
+
+.fall-text{
+position:fixed;
+top:-60px;
+font-size:22px;
+font-weight:bold;
+pointer-events:none;
+animation:fall linear forwards;
+text-shadow:0 0 10px currentColor;
+}
+
+.fall-icon{
+position:fixed;
+top:-60px;
+font-size:24px;
+pointer-events:none;
+animation:fallRotate linear forwards;
+text-shadow:0 0 15px currentColor;
+}
+
+/* chữ chỉ rơi */
+@keyframes fall{
+0%{
+transform:translateY(0);
+opacity:1;
+}
+100%{
+transform:translateY(110vh);
+opacity:0;
+}
+}
+
+/* icon rơi + xoay */
+@keyframes fallRotate{
+0%{
+transform:translateY(0) rotate(0deg) scale(0.8);
+opacity:1;
+}
+100%{
+transform:translateY(110vh) rotate(360deg) scale(1.2);
+opacity:0;
+}
+}
+
+
+.char{
+opacity:0;
+display:inline-block;
+white-space:pre; /* giữ khoảng trắng */
+}
+
+.char.show{
+opacity:1;
+animation: rainbowSpark 1.5s linear forwards;
+}
+
+@keyframes rainbowSpark{
+0%{
+color:red;
+text-shadow:0 0 5px red,0 0 10px red;
+transform:scale(0.5);
+}
+20%{
+color:orange;
+text-shadow:0 0 8px orange,0 0 15px orange;
+}
+40%{
+color:yellow;
+text-shadow:0 0 8px yellow,0 0 15px yellow;
+}
+60%{
+color:lime;
+text-shadow:0 0 8px lime,0 0 15px lime;
+}
+80%{
+color:deepskyblue;
+text-shadow:0 0 8px deepskyblue,0 0 15px deepskyblue;
+}
+100%{
+color:black;
+text-shadow:none;
+transform:scale(1);
+}
+}
+
+
+
+body{
+margin:0;
+overflow:hidden;
+background:black;
+font-family:Arial,sans-serif;
+}
+
+.title{
+position:absolute;
+top:60px;
+width:100%;
+text-align:center;
+font-size:60px;
+font-weight:bold;
+letter-spacing:4px;
+background:linear-gradient(90deg,#ff4d4d,#ffcc00,#00ffcc,#3399ff,#cc66ff,#ff4d4d);
+background-size:200% auto;
+background-clip:text;
+-webkit-background-clip:text;
+color:transparent;
+-webkit-text-fill-color:transparent;
+animation:rainbow 6s linear infinite;
+z-index:10;
+}
+@keyframes rainbow{
+0%{background-position:0%}
+100%{background-position:200%}
+}
+
+canvas{position:absolute;top:0;left:0;}
+
+.letter-container{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,0.85);
+visibility:hidden;
+opacity:0;
+transition:0.6s;
+z-index:100;
+}
+.letter-container.show{visibility:visible;opacity:1;}
+
+.envelope{
+position:relative;
+width:700px;height: 360px;
+background:#ff4d6d;
+cursor:pointer;
+perspective:1000px;
+}
+
+.flap{
+position:absolute;
+width:100%;height:100%;
+background:#ff758f;
+clip-path:polygon(0 0,100% 0,50% 60%);
+transform-origin:top;
+transition:0.6s;
+}
+.envelope.open .flap{transform:rotateX(180deg);}
+
+.letter{
+position:absolute;
+bottom:0;
+width:100%;height:100%;
+background:white;
+padding:20px;
+box-sizing:border-box;
+transform:translateY(100%);
+transition:0.6s;
+overflow:auto;
+}
+.envelope.open .letter{transform:translateY(0);}
+</style>
+</head>
+
+<body>
+
+<div class="title">HAPPY VALENTINE 14/2</div>
+
+<canvas id="space"></canvas>
+<canvas id="heart"></canvas>
+<canvas id="fire"></canvas>
+
+<div class="letter-container" id="letterBox">
+<div class="envelope" id="envelope">
+<div class="flap"></div>
+<div class="letter">
+<h2>Gửi người xinh đang đọc bức thư này ❤️</h2>
+<p id="typedText"></p>
+</div>
+</div>
+</div>
+
+<audio id="bgMusic" src="Download.mp4" autoplay loop muted></audio>
+
+
+
+<script>
+const space=document.getElementById("space");
+const heart=document.getElementById("heart");
+const fire=document.getElementById("fire");
+const sctx=space.getContext("2d");
+const fctx=fire.getContext("2d");
+
+let rainbowShift=0;
+let W,H;
+
+function resize(){
+W=window.innerWidth;
+H=window.innerHeight;
+space.width=heart.width=fire.width=W;
+space.height=heart.height=fire.height=H;
+}
+resize();
+window.addEventListener("resize",resize);
+
+/* ===== NỀN SAO ===== */
+let bgStars=[];
+for(let i=0;i<300;i++){
+bgStars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2,a:Math.random()});
+}
+
+/* ===== TRÁI TIM PARTICLE GỐC ===== */
+var settings={particles:{length:400,duration:2,velocity:100,effect:-0.75,size:30}};
+function Point(x,y){this.x=x||0;this.y=y||0;}
+Point.prototype.clone=function(){return new Point(this.x,this.y);}
+Point.prototype.length=function(length){
+if(length===undefined) return Math.sqrt(this.x*this.x+this.y*this.y);
+this.normalize(); this.x*=length; this.y*=length; return this;
+};
+Point.prototype.normalize=function(){
+var length=this.length(); this.x/=length; this.y/=length; return this;
+};
+function Particle(){this.position=new Point();this.velocity=new Point();this.acceleration=new Point();this.age=0;}
+Particle.prototype.initialize=function(x,y,dx,dy){
+this.position.x=x; this.position.y=y;
+this.velocity.x=dx; this.velocity.y=dy;
+this.acceleration.x=dx*settings.particles.effect;
+this.acceleration.y=dy*settings.particles.effect;
+this.age=0;
+};
+Particle.prototype.update=function(dt){
+this.position.x+=this.velocity.x*dt;
+this.position.y+=this.velocity.y*dt;
+this.velocity.x+=this.acceleration.x*dt;
+this.velocity.y+=this.acceleration.y*dt;
+this.age+=dt;
+};
+Particle.prototype.draw=function(ctx){
+function ease(t){return(--t)*t*t+1;}
+var size=settings.particles.size*ease(this.age/settings.particles.duration);
+ctx.globalAlpha=0.7*(1-this.age/settings.particles.duration);
+ctx.fillStyle='hsl(330,100%,50%)';
+ctx.beginPath();
+ctx.arc(this.position.x,this.position.y,size/15,0,2*Math.PI);
+ctx.fill();
+};
+function ParticlePool(length){
+var particles=new Array(length);
+for(var i=0;i<particles.length;i++) particles[i]=new Particle();
+var firstActive=0,firstFree=0,duration=settings.particles.duration;
+this.add=function(x,y,dx,dy){
+particles[firstFree].initialize(x,y,dx,dy);
+firstFree=(firstFree+1)%particles.length;
+if(firstActive===firstFree)
+firstActive=(firstActive+1)%particles.length;
+};
+this.update=function(dt){
+var i;
+if(firstActive<firstFree){
+for(i=firstActive;i<firstFree;i++) particles[i].update(dt);
+}else{
+for(i=firstActive;i<particles.length;i++) particles[i].update(dt);
+for(i=0;i<firstFree;i++) particles[i].update(dt);
+}
+while(particles[firstActive].age>=duration&&firstActive!=firstFree)
+firstActive=(firstActive+1)%particles.length;
+};
+this.draw=function(ctx){
+var i;
+if(firstActive<firstFree){
+for(i=firstActive;i<firstFree;i++) particles[i].draw(ctx);
+}else{
+for(i=firstActive;i<particles.length;i++) particles[i].draw(ctx);
+for(i=0;i<firstFree;i++) particles[i].draw(ctx);
+}
+};
+}
+(function(canvas){
+var context=canvas.getContext('2d'),
+particles=new ParticlePool(settings.particles.length),
+particleRate=settings.particles.length/settings.particles.duration,
+time;
+function pointOnHeart(t){
+return new Point(
+160*Math.pow(Math.sin(t),3),
+130*Math.cos(t)-50*Math.cos(2*t)-20*Math.cos(3*t)-10*Math.cos(4*t)+25
+);
+}
+function render(){
+requestAnimationFrame(render);
+var newTime=new Date().getTime()/1000,
+dt=newTime-(time||newTime);
+time=newTime;
+context.clearRect(0,0,W,H);
+var amount=particleRate*dt;
+for(var i=0;i<amount;i++){
+var pos=pointOnHeart(Math.PI-2*Math.PI*Math.random());
+var dir=pos.clone().length(settings.particles.velocity);
+particles.add(W/2+pos.x,H/2-pos.y,dir.x,-dir.y);
+}
+particles.update(dt);
+particles.draw(context);
+}
+setTimeout(render,10);
+})(heart);
+
+/* ===== TAURUS ===== */
+const stars=[{x:100,y:30},{x:40,y:10},{x:0,y:0},{x:-60,y:-20},{x:-130,y:-40},{x:-50,y:-90}];
+const lines=[[0,1],[1,2],[2,3],[3,4],[2,5]];
+let index=0,progress=0,loop=0,maxLoop=3;
+let unlocked=false,flashTime=0,flashDuration=60;
+
+/* ===== MINI LETTER ===== */
+let showMini=false,flying=false,arrived=false;
+let miniX=0,miniY=0,targetY=0;
+
+const mini=document.createElement("div");
+mini.innerHTML="💌";
+mini.style.position="fixed";
+mini.style.fontSize="34px";
+mini.style.width="70px";
+mini.style.height="70px";
+mini.style.display="flex";
+mini.style.alignItems="center";
+mini.style.justifyContent="center";
+mini.style.cursor="pointer";
+mini.style.zIndex="50";
+mini.style.opacity="0";
+document.body.appendChild(mini);
+
+mini.onclick=()=>{
+document.getElementById("letterBox").classList.add("show");
+mini.style.display="none";
+};
+
+function updateMini(){
+if(!showMini) return;
+if(flying&&!arrived){
+miniY+=4;
+if(miniY>=targetY){miniY=targetY;arrived=true;}
+}
+let shake=arrived?Math.sin(Date.now()*0.01)*5:0;
+mini.style.transform=`translate(${miniX}px,${miniY}px) rotate(${shake}deg)`;
+mini.style.opacity="1";
+}
+
+/* ===== LETTER ===== */
+const envelope = document.getElementById("envelope");
+const typedText = document.getElementById("typedText");
+const music = document.getElementById("bgMusic");
+document.addEventListener("click", () => {
+  music.muted = false;
+  music.play();
+}, { once: true });
+
+const message = 
+`Chúc em ngày Valentine 14/2 vui vẻ nhó, luôn xinh đẹp, dễ thương. Năm nay năm cuối cũng là năm quan trọng chúc em đạt được thành tựu tốt và đậu vào ngành mình chọn và trường mình thích.
+Nhớ là phải tự tin vào bản thân đó, cứ thử chắc chắn em làm được bời vì "Chị sao nò.."(^_~)
+Anh định nay rủ em đi chơi mà anh có việc xíu nên không rủ em đi chơi được (┬┬﹏┬┬) 
+(ノへ￣、)
+Dịp nào anh em rảnh anh có thể hẹn em mình cùng đi chơi nó (✿◡‿◡)
+Chúc em Valentine thật vui vẻ nhó
+                                           (○｀ 3′○)
+                                                     [YÊU EM (. ❛ ᴗ ❛.)]`;
+
+envelope.onclick = () => {
+
+  envelope.classList.toggle("open");
+  music.play();
+
+  if (typedText.innerHTML === "") {
+    typeWriter(message);
+  }
+
+};
+
+function typeWriter(text){
+
+typedText.innerHTML="";
+let i=0;
+
+function type(){
+
+if(i < text.length){
+
+if(text[i] === "\n"){
+typedText.appendChild(document.createElement("br"));
+}else{
+
+let span=document.createElement("span");
+span.textContent=text[i];
+span.className="char";
+typedText.appendChild(span);
+
+setTimeout(()=>{
+span.classList.add("show");
+},20);
+
+}
+
+i++;
+setTimeout(type,70);
+
+}
+
+}
+
+type();
+}
+
+
+
+/* ===== FIREWORK ===== */
+let fireworks=[];
+setInterval(()=>{
+fireworks.push({x:Math.random()*W,y:H,vy:-8,exploded:false,particles:[],hue:Math.random()*360});
+},2000);
+
+function drawFull(line,power=1){
+let cx=W/2,cy=H/2;
+let a=stars[line[0]],b=stars[line[1]];
+let grad=sctx.createLinearGradient(cx+a.x,cy+a.y,cx+b.x,cy+b.y);
+grad.addColorStop(0,`hsl(${rainbowShift%360},100%,60%)`);
+grad.addColorStop(1,`hsl(${(rainbowShift+180)%360},100%,60%)`);
+sctx.strokeStyle=grad;
+sctx.lineWidth=3*power;
+sctx.shadowBlur=20*power;
+sctx.shadowColor="white";
+sctx.beginPath();
+sctx.moveTo(cx+a.x,cy+a.y);
+sctx.lineTo(cx+b.x,cy+b.y);
+sctx.stroke();
+sctx.shadowBlur=0;
+}
+
+function animate(){
+requestAnimationFrame(animate);
+sctx.clearRect(0,0,W,H);
+fctx.clearRect(0,0,W,H);
+
+bgStars.forEach(st=>{
+sctx.globalAlpha=st.a;
+sctx.beginPath();
+sctx.arc(st.x,st.y,st.r,0,Math.PI*2);
+sctx.fillStyle="white";
+sctx.fill();
+});
+
+rainbowShift+=2;
+let cx=W/2,cy=H/2;
+
+/* 3 VÒNG ĐẦU */
+if(!unlocked){
+if(loop<maxLoop){
+for(let i=0;i<index;i++) drawFull(lines[i]);
+if(index<lines.length){
+let l=lines[index];
+let a=stars[l[0]],b=stars[l[1]];
+let curX=cx+a.x+(b.x-a.x)*progress;
+let curY=cy+a.y+(b.y-a.y)*progress;
+sctx.strokeStyle="white";
+sctx.lineWidth=2;
+sctx.beginPath();
+sctx.moveTo(cx+a.x,cy+a.y);
+sctx.lineTo(curX,curY);
+sctx.stroke();
+
+/* đóm sáng */
+sctx.beginPath();
+sctx.arc(curX,curY,4,0,Math.PI*2);
+sctx.fillStyle="white";
+sctx.fill();
+progress+=0.015;
+if(progress>=1){progress=0;index++;}
+}else{index=0;loop++;}
+}else{
+unlocked=true;
+
+index=0;      // ⭐ reset vẽ lại từ đầu
+progress=0;   // ⭐ reset tiến trình
+
+flashTime=flashDuration;
+showMini=true;
+
+miniX=cx;
+miniY=cy-100;
+targetY=cy+120;
+
+flying=true;
+mini.style.display="flex";
+}
+
+}else{
+if(index<lines.length){
+let l=lines[index];
+let a=stars[l[0]],b=stars[l[1]];
+let curX=cx+a.x+(b.x-a.x)*progress;
+let curY=cy+a.y+(b.y-a.y)*progress;
+drawFull(l);
+sctx.beginPath();
+sctx.moveTo(cx+a.x,cy+a.y);
+sctx.lineTo(curX,curY);
+sctx.stroke();
+progress+=0.02;
+if(progress>=1){progress=0;index++;}
+}else index=0;
+
+if(flashTime>0){
+lines.forEach(l=>drawFull(l,2));
+flashTime--;
+}
+}
+
+/* SAO */
+stars.forEach(st=>{
+
+/* glow nhẹ thôi */
+sctx.shadowBlur=6;
+sctx.shadowColor="white";
+
+sctx.beginPath();
+sctx.arc(cx+st.x,cy+st.y,3.5,0,Math.PI*2);
+sctx.fillStyle="white";
+sctx.fill();
+
+/* lõi trắng rõ nét */
+sctx.shadowBlur=0;
+sctx.beginPath();
+sctx.arc(cx+st.x,cy+st.y,1.5,0,Math.PI*2);
+sctx.fillStyle="#ffffff";
+sctx.fill();
+
+});
+
+
+
+/* FIREWORK */
+fireworks.forEach((fw,i)=>{
+if(!fw.exploded){
+fw.y+=fw.vy;fw.vy+=0.2;
+fctx.fillRect(fw.x,fw.y,2,2);
+if(fw.vy>=0){
+fw.exploded=true;
+for(let j=0;j<60;j++)
+fw.particles.push({x:fw.x,y:fw.y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:80});
+}
+}else{
+fw.particles.forEach((p,j)=>{
+p.x+=p.vx;p.y+=p.vy;p.life--;
+fctx.globalAlpha=p.life/80;
+fctx.fillStyle=`hsl(${fw.hue},100%,60%)`;
+fctx.beginPath();
+fctx.arc(p.x,p.y,2,0,Math.PI*2);
+fctx.fill();
+if(p.life<=0)fw.particles.splice(j,1);
+});
+if(fw.particles.length===0)fireworks.splice(i,1);
+}
+});
+
+updateMini();
+}
+animate();
+
+/* =========================
+   TYPE WRITER + [SPARKLE]
+========================= */
+
+function typeWriter(text){
+
+typedText.innerHTML="";
+let i=0;
+let sparkleMode=false;
+
+function type(){
+
+if(i < text.length){
+
+if(text[i] === "["){
+sparkleMode=true;
+i++;
+type();
+return;
+}
+
+if(text[i] === "]"){
+sparkleMode=false;
+i++;
+type();
+return;
+}
+
+if(text[i] === "\n"){
+typedText.appendChild(document.createElement("br"));
+}else{
+
+let span=document.createElement("span");
+span.textContent=text[i];
+span.className="char";
+
+/* nếu nằm trong [] thì lấp lánh liên tục */
+if(sparkleMode){
+span.style.animation="rainbowSpark 2s infinite";
+}
+
+typedText.appendChild(span);
+
+setTimeout(()=>{
+span.classList.add("show");
+},20);
+
+}
+
+i++;
+setTimeout(type,60);
+
+}
+
+}
+
+type();
+}
+
+
+/* =========================
+   FALLING TEXT + ICON
+========================= */
+
+const fallingTexts = ["Valentine hạnh phúc nhó", "Người dễ thương trước màn hình ơi", "Dễ thương thế" ];
+const fallingIcons = ["❤️","💖","💘","✨","❤️‍🔥"];
+
+function createFalling(){
+
+let isIcon = Math.random() < 0.5;
+
+let span = document.createElement("span");
+
+let center = window.innerWidth / 2;
+
+/* vị trí 2 bên trái tim */
+if(Math.random() < 0.5){
+span.style.left = (center - 350 + Math.random()*150) + "px";
+}else{
+span.style.left = (center + 200 + Math.random()*150) + "px";
+}
+
+/* màu random */
+span.style.color = `hsl(${Math.random()*360},100%,60%)`;
+
+/* tốc độ rơi */
+span.style.animationDuration = (4 + Math.random()*3) + "s";
+
+if(isIcon){
+span.className="fall-icon";
+span.innerText = fallingIcons[Math.floor(Math.random()*fallingIcons.length)];
+}else{
+span.className="fall-text";
+span.innerText = fallingTexts[Math.floor(Math.random()*fallingTexts.length)];
+}
+
+document.body.appendChild(span);
+
+setTimeout(()=>{
+span.remove();
+},8000);
+
+}
+
+setInterval(createFalling,600);
+
+
+</script>
+</body>
+</html>
